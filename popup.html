@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tab Reminder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 360px;
+      min-height: 400px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      color: #e2e8f0;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-icon { font-size: 22px; }
+    .header h1 { font-size: 15px; font-weight: 700; color: #fff; }
+    .header p { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+    /* Current Tab Section */
+    .current-tab {
+      background: #1a1a2e;
+      margin: 12px;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #2d2d44;
+    }
+    .tab-url {
+      font-size: 11px;
+      color: #6366f1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 10px;
+      background: #0f0f1a;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    textarea {
+      width: 100%;
+      background: #0f0f1a;
+      border: 1px solid #2d2d44;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 13px;
+      padding: 10px;
+      resize: none;
+      height: 70px;
+      outline: none;
+      transition: border 0.2s;
+      font-family: inherit;
+    }
+    textarea:focus { border-color: #6366f1; }
+    textarea::placeholder { color: #4a4a6a; }
+
+    .reminder-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .reminder-row label { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+    select {
+      flex: 1;
+      background: #0f0f1a;
+      border: 1px solid #2d2d44;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 12px;
+      padding: 6px 8px;
+      outline: none;
+    }
+
+    .btn-save {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-save:hover { opacity: 0.9; }
+
+    .saved-msg {
+      text-align: center;
+      font-size: 12px;
+      color: #22c55e;
+      margin-top: 6px;
+      display: none;
+    }
+
+    /* Tabs List */
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 12px 8px;
+    }
+
+    .tabs-list {
+      padding: 0 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .tabs-list::-webkit-scrollbar { width: 4px; }
+    .tabs-list::-webkit-scrollbar-thumb { background: #2d2d44; border-radius: 4px; }
+
+    .tab-item {
+      background: #1a1a2e;
+      border: 1px solid #2d2d44;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .tab-item-info { flex: 1; overflow: hidden; }
+    .tab-item-title {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #c4b5fd;
+    }
+    .tab-item-reason {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+    .tab-item-reminder {
+      font-size: 10px;
+      color: #6366f1;
+      margin-top: 4px;
+    }
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-delete:hover { background: rgba(239,68,68,0.15); }
+
+    .empty-state {
+      text-align: center;
+      color: #4a4a6a;
+      font-size: 13px;
+      padding: 20px;
+    }
+    .empty-state span { font-size: 28px; display: block; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">🧠</div>
+    <div>
+      <h1>Tab Reminder</h1>
+      <p>Remember why you opened this tab</p>
+    </div>
+  </div>
+
+  <div class="current-tab">
+    <div class="label">Current Tab</div>
+    <div class="tab-url" id="currentUrl">Loading...</div>
+
+    <div class="label">Why did you open this?</div>
+    <textarea id="reasonInput" placeholder="e.g. Check pricing for the project, research for blog post..."></textarea>
+
+    <div class="reminder-row">
+      <label>⏰ Remind me in:</label>
+      <select id="reminderTime">
+        <option value="0">No reminder</option>
+        <option value="5">5 minutes</option>
+        <option value="15">15 minutes</option>
+        <option value="30">30 minutes</option>
+        <option value="60">1 hour</option>
+        <option value="120">2 hours</option>
+      </select>
+    </div>
+
+    <button class="btn-save" id="saveBtn">💾 Save Reason</button>
+    <div class="saved-msg" id="savedMsg">✅ Saved! You won't forget now.</div>
+  </div>
+
+  <div class="section-title">📌 Saved Tabs</div>
+
+  <div class="tabs-list" id="tabsList">
+    <div class="empty-state">
+      <span>🗂️</span>
+      No saved tabs yet.<br>Start by saving a reason above!
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
